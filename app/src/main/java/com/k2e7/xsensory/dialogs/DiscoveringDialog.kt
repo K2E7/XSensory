@@ -2,10 +2,10 @@ package com.k2e7.xsensory.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Toast
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
@@ -21,8 +21,9 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.k2e7.xsensory.databinding.LayoutSearchingToReceiveBinding
 import com.k2e7.xsensory.helpers.FilesFetcher
+import kotlin.random.Random
 
-class DiscoveringDialog(private val context: Context, private val regexPattern: String) {
+class DiscoveringDialog(private val context: Context) {
 
     private lateinit var dialog: AlertDialog
     private lateinit var b: LayoutSearchingToReceiveBinding
@@ -50,16 +51,17 @@ class DiscoveringDialog(private val context: Context, private val regexPattern: 
     // Callback for connecting to other devices
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-            if (Regex(regexPattern, RegexOption.IGNORE_CASE).matches(connectionInfo.endpointName))
-                connectionsClient.rejectConnection(endpointId)
-            else {
+//            if (connectionInfo.endpointName.first().code != clusterId) {
+//                connectionsClient.rejectConnection(endpointId)
+//                Toast.makeText(context, "$connectionInfo.endpointName : $clusterId", Toast.LENGTH_SHORT).show()
+//            } else {
                 connectionsClient.acceptConnection(endpointId, payloadCallback)
                     .addOnFailureListener {
                         dialog.setCancelable(true)
                         b.tvSearching.text = it.localizedMessage ?: "Unknown connection error"
                     }
             }
-        }
+//        }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
 
@@ -154,8 +156,10 @@ class DiscoveringDialog(private val context: Context, private val regexPattern: 
     }
 
     private fun requestConnection(endpointId: String) {
+        val randomNumber = Random.nextInt()
+
         connectionsClient.requestConnection(
-            "${Build.BRAND}: ${Build.MODEL}",
+            "RECEIVER-$randomNumber",
             endpointId,
             connectionLifecycleCallback
         )

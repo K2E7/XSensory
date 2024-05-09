@@ -10,10 +10,6 @@ import java.io.File
 
 class AppViewModel : ViewModel() {
 
-    var clusterID : String = ""
-
-
-
     val fileLiveData : MutableLiveData<File?> = MutableLiveData()
     fun getNthFile(n:Int){
         viewModelScope.launch {

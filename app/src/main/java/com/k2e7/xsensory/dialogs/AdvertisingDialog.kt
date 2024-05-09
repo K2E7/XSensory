@@ -3,11 +3,10 @@ package com.k2e7.xsensory.dialogs
 import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
+import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
@@ -21,23 +20,21 @@ import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.k2e7.xsensory.AppViewModel
-import com.k2e7.xsensory.R
 import com.k2e7.xsensory.databinding.LayoutSearchingToSendBinding
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.random.Random
 
 class AdvertisingDialog(
     private val vm: AppViewModel,
     private val context: Context,
     private val file: File,
-    private val regexPattern: String
 ) {
 
     private lateinit var dialog: AlertDialog
     private lateinit var b: LayoutSearchingToSendBinding
     private val connectionsClient: ConnectionsClient by lazy { Nearby.getConnectionsClient(context) }
     var connectionEnd = false
-
 
 
     fun show() {
@@ -50,8 +47,9 @@ class AdvertisingDialog(
 
         dialog = AlertDialog.Builder(context)
             .setView(b.root)
-            .setCancelable(true)
+            .setCancelable(false)
             .show()
+
 
         startAdvertising()
 
@@ -69,10 +67,7 @@ class AdvertisingDialog(
                     btnStartTransfer.apply {
                         visibility = View.VISIBLE
                         setOnClickListener {
-                            if (Regex(regexPattern, RegexOption.IGNORE_CASE).matches(connectionInfo.endpointName)){
-                                    connectionsClient.rejectConnection(endpointId)
-                                }
-                            else {
+                                //if(connectionInfo.endpointName.startswith(""))
                                 connectionsClient.acceptConnection(endpointId, payloadCallback)
                                     .addOnSuccessListener {
                                         Log.d(
@@ -88,8 +83,8 @@ class AdvertisingDialog(
                                             it.localizedMessage ?: "Unknown error"
                                         )
                                     }
-                            }
-                            this.visibility = View.GONE
+                                this.visibility = View.GONE
+//                            }
                         }
                     }
                 }
@@ -168,9 +163,10 @@ class AdvertisingDialog(
 
     // Start advertising the connection
     private fun startAdvertising() {
+        val randomNumber = Random.nextInt()
         vm.viewModelScope.launch {
             connectionsClient.startAdvertising(
-                "${Build.BRAND}: ${Build.MODEL}",
+                "SENDER-$randomNumber",
                 context.packageName,
                 connectionLifecycleCallback,
                 AdvertisingOptions.Builder().setStrategy(Strategy.P2P_POINT_TO_POINT).build()

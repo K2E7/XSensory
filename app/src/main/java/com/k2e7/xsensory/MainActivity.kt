@@ -15,6 +15,8 @@ import com.k2e7.xsensory.dialogs.DiscoveringDialog
 
 class MainActivity : AppCompatActivity() {
 
+    var clusterId : Int = 0
+
     private lateinit var b: ActivityMainBinding
 
     private val vm : AppViewModel by lazy {
@@ -44,17 +46,10 @@ class MainActivity : AppCompatActivity() {
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        if(b.etClusterID.toString().isNotEmpty())
-            vm.clusterID = b.etClusterID.text.toString()
-
-        vm.fileLiveData.observe(this){
-            it?.let{
-                AdvertisingDialog(vm, this,it, vm.clusterID).show()
-            } ?: kotlin.run { b.etVideoNumber.error = "File not found" }
-        }
         b.btnSend.setOnClickListener {
             // Check permission before performing action
             if(askPermissions()) return@setOnClickListener
+
 
             val str = b.etVideoNumber.text.toString()
             if(str.isEmpty()) {
@@ -64,11 +59,18 @@ class MainActivity : AppCompatActivity() {
             val n = b.etVideoNumber.text.toString().toInt()
             vm.getNthFile(n)
         }
+
+        vm.fileLiveData.observe(this){
+            it?.let{
+                AdvertisingDialog(vm, this, it).show()
+            } ?: kotlin.run { b.etVideoNumber.error = "File not found" }
+        }
+
         b.btnReceive.setOnClickListener {
             // Check permission before performing action
             if(askPermissions()) return@setOnClickListener
 
-            DiscoveringDialog(this, vm.clusterID).show()
+            DiscoveringDialog(this).show()
         }
     }
 
