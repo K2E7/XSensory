@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
     // Check permissions granted based on OS version
     private fun genPermissionsAreGranted(): Boolean {
         val res = (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
